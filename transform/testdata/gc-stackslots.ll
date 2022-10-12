@@ -28,8 +28,7 @@ define i8* @needsStackSlots() {
 
 ; Check some edge cases of pointer tracking.
 define i8* @needsStackSlots2() {
-  ; Only one stack slot should be created for this (but at the moment, one is
-  ; created for each call to runtime.trackPointer).
+  ; Only one stack slot should be created for this.
   %ptr1 = call i8* @getPointer()
   call void @runtime.trackPointer(i8* %ptr1)
   call void @runtime.trackPointer(i8* %ptr1)

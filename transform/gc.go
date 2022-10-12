@@ -140,12 +140,21 @@ func MakeGCStackSlots(mod llvm.Module) bool {
 
 		// Determine what to do with each call.
 		var allocas, pointers []llvm.Value
+		foundPtrs := make(map[llvm.Value]struct{})
 		for _, call := range calls {
 			ptr := call.Operand(0)
 			call.EraseFromParentAsInstruction()
 			if ptr.IsAInstruction().IsNil() {
 				continue
 			}
+			if _, ok := foundPtrs[ptr]; ok {
+				// runtime.trackPointer is sometimes called twice on a single
+				// pointer object. Don't. track them twice.
+				// This is especially important for allocas, which must only be
+				// deleted once.
+				continue
+			}
+			foundPtrs[ptr] = struct{}{}
 
 			// Some trivial optimizations.
 			if ptr.IsAInstruction().IsNil() {
@@ -235,6 +244,9 @@ func MakeGCStackSlots(mod llvm.Module) bool {
 		stackObjectCast := builder.CreateBitCast(stackObject, stackChainStartType, "")
 		builder.CreateStore(stackObjectCast, stackChainStart)
 
+		// Remove instructions at the end to avoid memory corruption.
+		var removeInsts []llvm.Value
+
 		// Replace all independent allocas with GEPs in the stack object.
 		for i, alloca := range allocas {
 			gep := builder.CreateGEP(stackObjectType, stackObject, []llvm.Value{
@@ -242,7 +254,7 @@ func MakeGCStackSlots(mod llvm.Module) bool {
 				llvm.ConstInt(ctx.Int32Type(), uint64(2+i), false),
 			}, "")
 			alloca.ReplaceAllUsesWith(gep)
-			alloca.EraseFromParentAsInstruction()
+			removeInsts = append(removeInsts, alloca)
 		}
 
 		// Do a store to the stack object after each new pointer that is created.
@@ -283,6 +295,12 @@ func MakeGCStackSlots(mod llvm.Module) bool {
 			}
 			builder.SetInsertPointBefore(ret)
 			builder.CreateStore(parent, stackChainStart)
+		}
+
+		// Erase all these instructions at the end, after this function is fully
+		// processed.
+		for _, inst := range removeInsts {
+			inst.EraseFromParentAsInstruction()
 		}
 	}
 

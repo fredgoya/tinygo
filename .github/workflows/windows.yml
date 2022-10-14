@@ -118,12 +118,9 @@ jobs:
         shell: bash
         working-directory: build
         run: 7z x release.zip -r
-      - name: What we got
-        shell: bash
-        run: ls -l $(PWD)/build && ls -l $(PWD)/build/tinygo
       - name: Smoke tests
         shell: bash
-        run: make smoketest TINYGO=$(PWD)/build/tinygo AVR=0 XTENSA=0
+        run: make smoketest TINYGO=$(PWD)/build/tinygo/bin/tinygo AVR=0 XTENSA=0
 
   stdlibtest-windows:
     runs-on: windows-2022
@@ -148,7 +145,7 @@ jobs:
         working-directory: build
         run: 7z x release.zip -r
       - name: Test stdlib packages
-        run: make tinygo-test TINYGO=$(PWD)/build/tinygo
+        run: make tinygo-test TINYGO=$(PWD)/build/tinygo/bin/tinygo
 
   stdlibwasitest-windows:
     runs-on: windows-2022
@@ -173,4 +170,4 @@ jobs:
         working-directory: build
         run: 7z x release.zip -r
       - name: Test stdlib packages on wasi
-        run: make tinygo-test-wasi-fast TINYGO=$(PWD)/build/tinygo
+        run: make tinygo-test-wasi-fast TINYGO=$(PWD)/build/tinygo/bin/tinygo

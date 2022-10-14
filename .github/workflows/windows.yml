@@ -118,6 +118,9 @@ jobs:
         shell: bash
         working-directory: build
         run: 7z x release.zip -r
+      - name: What we got
+        shell: bash
+        run: ls -l $(PWD)/build && ls -l $(PWD)/build/tinygo
       - name: Smoke tests
         shell: bash
         run: make smoketest TINYGO=$(PWD)/build/tinygo AVR=0 XTENSA=0

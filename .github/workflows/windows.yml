@@ -96,10 +96,17 @@ jobs:
           name: release-double-zipped
           path: build/release/release.zip
 
-  smoketest-windows:
+  smoke-test-windows:
     runs-on: windows-2022
     needs: build-windows
     steps:
+      - uses: brechtm/setup-scoop@v2
+        with:
+          scoop_update: 'false'
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          scoop install binaryen
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -122,7 +129,7 @@ jobs:
         shell: bash
         run: make smoketest TINYGO=$(PWD)/build/tinygo/bin/tinygo AVR=0 XTENSA=0
 
-  stdlibtest-windows:
+  stdlib-test-windows:
     runs-on: windows-2022
     needs: build-windows
     steps:
@@ -147,10 +154,17 @@ jobs:
       - name: Test stdlib packages
         run: make tinygo-test TINYGO=$(PWD)/build/tinygo/bin/tinygo
 
-  stdlibwasitest-windows:
+  stdlib-wasi-test-windows:
     runs-on: windows-2022
     needs: build-windows
     steps:
+      - uses: brechtm/setup-scoop@v2
+        with:
+          scoop_update: 'false'
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          scoop install binaryen
       - name: Checkout
         uses: actions/checkout@v2
         with:

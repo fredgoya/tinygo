@@ -113,11 +113,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: release-double-zipped
-          path: build/release/release.zip
+          path: build/
       - name: Unzip TinyGo build
         shell: bash
         working-directory: build
-        run: 7z x release/release.zip
+        run: 7z x release.zip -r
       - name: Smoke tests
         shell: bash
         run: make smoketest TINYGO=$(PWD)/build/tinygo AVR=0 XTENSA=0
@@ -139,13 +139,13 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: release-double-zipped
-          path: build/release/release.zip
+          path: build/
       - name: Unzip TinyGo build
         shell: bash
         working-directory: build
-        run: 7z x release/release.zip
+        run: 7z x release.zip -r
       - name: Test stdlib packages
-        run: make tinygo-test
+        run: make tinygo-test TINYGO=$(PWD)/build/tinygo
 
   stdlibwasitest-windows:
     runs-on: windows-2022
@@ -164,10 +164,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: release-double-zipped
-          path: build/release/release.zip
+          path: build/
       - name: Unzip TinyGo build
         shell: bash
         working-directory: build
-        run: 7z x release/release.zip
+        run: 7z x release.zip -r
       - name: Test stdlib packages on wasi
-        run: make tinygo-test-wasi-fast
+        run: make tinygo-test-wasi-fast TINYGO=$(PWD)/build/tinygo

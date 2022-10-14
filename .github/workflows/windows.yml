@@ -95,10 +95,79 @@ jobs:
         with:
           name: release-double-zipped
           path: build/release/release.zip
+
+  smoketest-windows:
+    runs-on: windows-2022
+    needs: build-windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+          cache: true
+      - name: Download TinyGo build
+        uses: actions/download-artifact@v2
+        with:
+          name: release-double-zipped
+          path: build/release/release.zip
+      - name: Unzip TinyGo build
+        shell: bash
+        working-directory: build
+        run: 7z x release/release.zip
       - name: Smoke tests
         shell: bash
         run: make smoketest TINYGO=$(PWD)/build/tinygo AVR=0 XTENSA=0
+
+  stdlibtest-windows:
+    runs-on: windows-2022
+    needs: build-windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+          cache: true
+      - name: Download TinyGo build
+        uses: actions/download-artifact@v2
+        with:
+          name: release-double-zipped
+          path: build/release/release.zip
+      - name: Unzip TinyGo build
+        shell: bash
+        working-directory: build
+        run: 7z x release/release.zip
       - name: Test stdlib packages
         run: make tinygo-test
+
+  stdlibwasitest-windows:
+    runs-on: windows-2022
+    needs: build-windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+          cache: true
+      - name: Download TinyGo build
+        uses: actions/download-artifact@v2
+        with:
+          name: release-double-zipped
+          path: build/release/release.zip
+      - name: Unzip TinyGo build
+        shell: bash
+        working-directory: build
+        run: 7z x release/release.zip
       - name: Test stdlib packages on wasi
         run: make tinygo-test-wasi-fast
